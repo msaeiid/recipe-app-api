@@ -15,7 +15,7 @@ class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **extra_fields):
         # password=None because we can create unusable user for some use cases like **test**
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         # If you have multiple databases, its a best practice to do so
