@@ -9,8 +9,8 @@ from core import models
 
 class UserAdmin(BaseUserAdmin):
     """Define the admin pages for users."""
-    ordering = ['id',]
-    list_display = ['email', 'name',]
+    ordering = ['id', ]
+    list_display = ['email', 'name', ]
     # because in our model we don't have username field instead we used email,
     # we should define fieldsets with the fields we defined in our model
     # field set categorize each section in detail view of the user model
@@ -29,11 +29,11 @@ class UserAdmin(BaseUserAdmin):
         (_('Important dates'), {'fields': ('last_login',)}),
 
     )
-    readonly_fields = ['last_login',]
+    readonly_fields = ['last_login', ]
     # fields which are used when creating a user
     add_fieldsets = [
         (None, {
-            'classes': ('wide',),
+            'classes': ('wide', ),
             'fields': [
                 'email',
                 'password1',

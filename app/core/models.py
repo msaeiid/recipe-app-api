@@ -14,7 +14,8 @@ class UserManager(BaseUserManager):
     """Manager for users."""
 
     def create_user(self, email, password=None, **extra_fields):
-        # password=None because we can create unusable user for some use cases like **test**
+        # password=None because we can create unusable user for
+        # some use cases like test
         if not email:
             raise ValueError('User must have an email address.')
         user = self.model(email=self.normalize_email(email), **extra_fields)
