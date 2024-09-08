@@ -8,7 +8,7 @@ from core import models
 
 
 class UserAdmin(BaseUserAdmin):
-    """Define thr admin pages for users."""
+    """Define the admin pages for users."""
     ordering = ['id',]
     list_display = ['email', 'name',]
     # because in our model we don't have username field instead we used email,

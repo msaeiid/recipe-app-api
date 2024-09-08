@@ -1,11 +1,11 @@
-# GIT
+# Git
 .git
 .gitignore
 
 # Docker
-.docker 
+.docker
 
-# python
+# Python
 
 app/__pycache__/
 app/*/__pycache__/
