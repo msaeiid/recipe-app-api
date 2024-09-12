@@ -1,6 +1,7 @@
 """
 Database models.
 """
+from django.conf import settings
 
 from django.db import models
 from django.contrib.auth.models import (
@@ -46,3 +47,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Assign user manager to user model
 
     USERNAME_FIELD = 'email'
+
+
+class Recipe(models.Model):
+    """Recipe object."""
+    user = models.ForeignKey(
+        # reason we user settings.AUTH_USER_MODEL and not "User" because
+        # if we change User model name we shouldn't change 'User'
+        # everywhere in project only we change it in settings.
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    time_minutes = models.IntegerField()
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    # if we have an external link to link out to
+    link = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return self.title
