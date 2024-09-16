@@ -9,6 +9,11 @@ from django.contrib.auth import get_user_model
 from core import models
 
 
+def create_user(email='user@example.com', password='testpass213'):
+    """Create and return a new user."""
+    return get_user_model().objects.create_user(email=email, password=password)
+
+
 class ModelTests(TestCase):
     """Tests models."""
 
@@ -60,16 +65,34 @@ class ModelTests(TestCase):
             'test@example.com',
             'testpass123',
         )
-
+        # if you creating a financial app its
+        # better to use integer for currency
+        # it more accurate for calculation.
+        # here we user decimal because its for displaying on recipe.
+        # it's not a good practice to use float and decimal for
+        # storing prices
         recipe = models.Recipe.objects.create(
             user=user,
             title='Sample recipe name',
             time_minutes=5,
-            # if you create a financial app its better to use integer for currency it more accurate for calculation.
-            # here we user decimal because its for displaying on recipe.
-            # it's not a good practice to use float and decimal for storing prices
             price=Decimal(5.50),
             description='Sample recipe description',
         )
 
         self.assertEqual(str(recipe), recipe.title)
+
+    def test_create_tag(self):
+        """Test creating a tag is successful."""
+        user = create_user()
+        tag = models.Tag.objects.create(user=user, name='tag1')
+
+        self.assertEqual(str(tag), tag.name)
+
+    def test_create_ingredient(self):
+        """Test creating an ingredient is successful."""
+        user = create_user()
+        ingredient = models.Ingredient.objects.create(
+            user=user,
+            name='ingredient1'
+        )
+        self.assertEqual(str(ingredient), ingredient.name)
