@@ -20,11 +20,16 @@ def create_user(email='user@example.com', password='testpass123'):
     return get_user_model().objects.create_user(email=email, password=password)
 
 
+def detail_url(ingredient_id):
+    """Create are return an ingredient detail URL."""
+    return reverse('recipe:ingredient-detail', args=[ingredient_id])
+
+
 class PublicIngredientsApiTests(TestCase):
     """Test unauthenticated API requests."""
 
     def setUp(self):
-        self.client = APIClient
+        self.client = APIClient()
 
     def test_auth_required(self):
         """Test auth required for retrieving ingredients."""
@@ -38,7 +43,7 @@ class PrivateIngredientApiTests(TestCase):
 
     def setUp(self):
         self.user = create_user()
-        self.client = APIClient
+        self.client = APIClient()
         self.client.force_authenticate(self.user)
 
     def test_retrieve_ingredients(self):
@@ -56,7 +61,7 @@ class PrivateIngredientApiTests(TestCase):
 
     def test_ingredients_limited_to_user(self):
         """Test list of ingredients is limited to authenticated user."""
-        user2 = create_user(email='user@example.com')
+        user2 = create_user(email='user2@example.com')
         Ingredient.objects.create(user=user2, name='Salt')
         ingredient = Ingredient.objects.create(user=self.user, name='Pepper')
 
@@ -64,5 +69,26 @@ class PrivateIngredientApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data[0].name, ingredient.name)
-        self.assertEqual(res.data[0].id, ingredient.id)
+        self.assertEqual(res.data[0]['name'], ingredient.name)
+        self.assertEqual(res.data[0]['id'], ingredient.id)
+
+    def test_update_ingredient(self):
+        """Test updating an ingredient."""
+        ingredient = Ingredient.objects.create(user=self.user, name='Cilantro')
+        payload = {'name': 'Coriander'}
+        url = detail_url(ingredient.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        ingredient.refresh_from_db()
+        self.assertEqual(ingredient.name, payload['name'])
+
+    def test_delete_ingredient(self):
+        """Test deleting an ingredient."""
+        ingredient = Ingredient.objects.create(user=self.user, name='Lettuce')
+        url = detail_url(ingredient.pk)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        ingredients = Ingredient.objects.filter(user=self.user)
+        self.assertFalse(ingredients.exists())
