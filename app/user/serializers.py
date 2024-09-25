@@ -1,10 +1,13 @@
 """
-Serializers for the user API view.
+Serializers for the user API View.
 """
 
 from django.contrib.auth import (
     get_user_model,
-    authenticate)
+    authenticate,
+)
+from django.utils.translation import gettext as _
+
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 
@@ -15,13 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ['email', 'password', 'name']
-        extra_kwargs = {
-            'password':
-            {
-                'write_only': True,
-                'min_length': 5
-            }
-        }
+        extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
 
     def create(self, validated_data):
         """Create and return a user with encrypted password."""
@@ -53,7 +50,7 @@ class AuthTokenSerializer(serializers.Serializer):
         password = attrs.get('password')
         user = authenticate(
             request=self.context.get('request'),
-            email=email,
+            username=email,
             password=password
         )
         if not user:

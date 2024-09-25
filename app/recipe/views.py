@@ -1,4 +1,5 @@
-"""View for Recipe APIs.
+"""
+View for the recipe APIs.
 """
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -9,13 +10,18 @@ from drf_spectacular.utils import (
 from rest_framework import (
     viewsets,
     mixins,
-    status)
+    status,
+)
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import Recipe, Tag, Ingredient
+from core.models import (
+    Recipe,
+    Tag,
+    Ingredient,
+)
 from recipe import serializers
 
 
@@ -27,13 +33,13 @@ from recipe import serializers
             OpenApiParameter(
                 'tags',
                 OpenApiTypes.STR,
-                description='Comma separated list of tags IDs for filter.',
+                description='Comma separated list of tag IDs to filter',
             ),
             OpenApiParameter(
                 'ingredients',
                 OpenApiTypes.STR,
                 description='Comma separated list of ingredients IDs to filter.',
-            )
+            ),
         ]
     )
 )
@@ -44,7 +50,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def _params_to_int(self, qs: str):
+    def _params_to_ints(self, qs: str):
         """Convert a list of strings to integers."""
         return [int(str_id) for str_id in qs.split(',')]
 
@@ -55,17 +61,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = self.request.query_params.get('ingredients')
         queryset = self.queryset
         if tags:
-            tags_ids = self._params_to_int(tags)
+            tags_ids = self._params_to_ints(tags)
             queryset = queryset.filter(tags__id__in=tags_ids)
         if ingredients:
-            ingredient_ids = self._params_to_int(ingredients)
+            ingredient_ids = self._params_to_ints(ingredients)
             queryset = queryset.filter(ingredients__id__in=ingredient_ids)
         return queryset.filter(
             user=self.request.user
         ).order_by('-id').distinct()
 
     def get_serializer_class(self):
-        """Return the serializer for request."""
+        """Return the serializer class for request."""
         if self.action == 'list':
             # in list serializer doesn't show
             # description field an the rest shows
@@ -100,7 +106,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'assigned_only',
                 OpenApiTypes.INT, enum=[0, 1],
                 description='Filter by items assigned to recipe.'
-            )
+            ),
         ]
     )
 )
@@ -113,9 +119,9 @@ class BaseRecipeAttrViewSet(mixins.ListModelMixin,
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Filter queryset to authenticate user."""
+        """Filter queryset to authenticated user."""
         assigned_only = bool(
-            self.request.query_params.get('assigned_only', 0)
+            int(self.request.query_params.get('assigned_only', 0))
         )
         queryset = self.queryset
         if assigned_only:
@@ -133,6 +139,6 @@ class TagViewSet(BaseRecipeAttrViewSet):
 
 
 class IngredientViewSet(BaseRecipeAttrViewSet):
-    """Manage Ingredients in the database."""
+    """Manage ingredients in the database."""
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()

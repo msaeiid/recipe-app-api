@@ -3,6 +3,7 @@ Database models.
 """
 import uuid
 import os
+
 from django.conf import settings
 
 from django.db import models
@@ -27,6 +28,7 @@ class UserManager(BaseUserManager):
     """Manager for users."""
 
     def create_user(self, email, password=None, **extra_fields):
+        """Create, save and return a new user."""
         # password=None because we can create unusable user for
         # some use cases like test
         if not email:
@@ -37,14 +39,13 @@ class UserManager(BaseUserManager):
         # If you have multiple databases, its a best practice to do so
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, password):
         """Create and return a new superuser."""
-        user = self.create_user(email,
-                                password,
-                                **extra_fields)
+        user = self.create_user(email, password)
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
+
         return user
 
 
@@ -68,7 +69,8 @@ class Recipe(models.Model):
         # if we change User model name we shouldn't change 'User'
         # everywhere in project only we change it in settings.
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     time_minutes = models.IntegerField()
@@ -88,7 +90,7 @@ class Tag(models.Model):
     name = models.CharField(max_length=255)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
     def __str__(self):
@@ -96,11 +98,11 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    """Ingredient for recipe."""
+    """Ingredient for recipes."""
     name = models.CharField(max_length=255)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
     def __str__(self):

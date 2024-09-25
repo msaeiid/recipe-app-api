@@ -1,5 +1,4 @@
 FROM python:3.9-alpine3.13
-
 LABEL maintainer="SKarbaschian"
 
 ENV PYTHONUNBUFFERED 1
@@ -37,4 +36,5 @@ RUN python -m venv /py && \
 ENV PATH="/scripts:/py/bin:${PATH}"
 
 USER django-user
+
 CMD [ "run.sh" ]

@@ -1,6 +1,7 @@
 """
-Test for Tags API.
+Tests for the tags API.
 """
+
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -9,15 +10,15 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Tag, Recipe
+from core.models import (
+    Tag,
+    Recipe,
+)
+
 from recipe.serializers import TagSerializer
 
+
 TAGS_URL = reverse('recipe:tag-list')
-
-
-def create_user(email='user@example.com', password='testpass123'):
-    """Create and return a user."""
-    return get_user_model().objects.create_user(email=email, password=password)
 
 
 def detail_url(tag_id):
@@ -25,8 +26,13 @@ def detail_url(tag_id):
     return reverse('recipe:tag-detail', args=[tag_id])
 
 
+def create_user(email='user@example.com', password='testpass123'):
+    """Create and return a user."""
+    return get_user_model().objects.create_user(email=email, password=password)
+
+
 class PublicTagsApiTests(TestCase):
-    """Test unauthorized API requests."""
+    """Test unauthenticated API requests."""
 
     def setUp(self):
         self.client = APIClient()
@@ -38,7 +44,7 @@ class PublicTagsApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateTagsApiTest(TestCase):
+class PrivateTagsApiTests(TestCase):
     """Test authenticated API requests."""
 
     def setUp(self):
@@ -75,10 +81,8 @@ class PrivateTagsApiTest(TestCase):
     def test_update_tag(self):
         """Test updating a tag."""
         tag = Tag.objects.create(user=self.user, name='After Dinner')
-        payload = {
-            'name': 'Dessert'
-        }
-        url = detail_url(tag.pk)
+        payload = {'name': 'Dessert'}
+        url = detail_url(tag.id)
         res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -104,7 +108,7 @@ class PrivateTagsApiTest(TestCase):
             title='Green Eggs on Toast',
             time_minutes=10,
             price=Decimal('2.50'),
-            user=self.user
+            user=self.user,
         )
         recipe.tags.add(tag1)
 
@@ -115,7 +119,7 @@ class PrivateTagsApiTest(TestCase):
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data, res.data)
 
-    def test_filtered_tag_unique(self):
+    def test_filtered_tags_unique(self):
         """Test filtered tags returns a unique list."""
         tag = Tag.objects.create(user=self.user, name='Breakfast')
         Tag.objects.create(user=self.user, name='Dinner')
@@ -123,7 +127,7 @@ class PrivateTagsApiTest(TestCase):
             title='Pancakes',
             time_minutes=5,
             price=Decimal('5.00'),
-            user=self.user
+            user=self.user,
         )
         recipe2 = Recipe.objects.create(
             title='Porridge',
