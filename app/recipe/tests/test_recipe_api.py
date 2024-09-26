@@ -51,7 +51,7 @@ def create_recipe(user, **params):
     }
     defaults.update(params)
 
-    recipe = Recipe.objects.create(user=user, **default)
+    recipe = Recipe.objects.create(user=user, **params)
     return recipe
 
 
@@ -190,7 +190,7 @@ class PrivateRecipeAPITests(TestCase):
 
         payload = {'user': new_user.id}
         url = detail_url(recipe.id)
-        res = self.client.patch(url, payload)
+        self.client.patch(url, payload)
 
         recipe.refresh_from_db()
         self.assertEqual(recipe.user, self.user)
